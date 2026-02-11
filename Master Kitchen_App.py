@@ -82,11 +82,9 @@ def run_daily_special():
     s = random.choice(sides)
     z = random.choice(sauces)
     
-    # We save this to a variable so we can log it later if we want!
     special_text = f"Today's Special: Pan-seared {p} with {s} and {z} drizzle."
     print(special_text)
     
-    # Day 7 Part 2 Integration: Save the Menu automatically
     with open("daily_menu.txt", "w") as file:
         file.write("--- TODAY'S SPECIAL ---\n")
         file.write(special_text)
@@ -106,10 +104,35 @@ def update_logs():
         
     print(f" [SUCCESS] Log entry appended to 'security_log.txt'")
 
+# --- STATION 6: MENU READER (Day 8 + 9) ---
+def view_last_menu():
+    print("\n" + "-"*30)
+    print("--- RETRIEVING LAST MENU ---")
+    try:
+        with open("daily_menu.txt", "r") as file:
+            saved_menu = file.read()
+            print(saved_menu)
+    except FileNotFoundError:
+        print(" [ERROR] No menu found. Please generate a Daily Special first.")
+
+# --- STATION 7: LOG INSPECTOR (Day 8 + 9) ---
+def view_security_logs():
+    print("\n" + "-"*30)
+    print("--- SECURITY LOG HISTORY ---")
+    try:
+        with open("security_log.txt", "r") as file:
+            logs = file.read()
+            print(logs)
+    except FileNotFoundError:
+        print(" [ERROR] No logs found. System is clean (or logs deleted).")
+
 
 # ==========================================
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
+# NOTICE: This loop is at the very END. 
+# It runs only after Python has learned all the functions above.
+
 while True:
     print("\n" + "="*40)
     print("   MMADU'S KITCHEN OS - MAIN MENU")
@@ -117,8 +140,10 @@ while True:
     print("1. Login System (Days 1-3)")
     print("2. Firewall Check (Day 4)")
     print("3. Password Generator (Day 6)")
-    print("4. Daily Special Generator (Day 6/7)")
+    print("4. Generate Daily Special (Day 6/7)")
     print("5. Update Security Logs (Day 7)")
+    print("6. View Last Menu (Day 8/9) [NEW]")
+    print("7. View Security Logs (Day 8/9) [NEW]")
     print("Q. Quit Application")
     
     choice = input("\nSelect an option: ").upper()
@@ -133,9 +158,12 @@ while True:
         run_daily_special()
     elif choice == '5':
         update_logs()
+    elif choice == '6':
+        view_last_menu()
+    elif choice == '7':
+        view_security_logs()
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
-        break  # This breaks the 'while True' loop and ends the program
+        break  
     else:
         print("Invalid Selection. Please try again.")
-        
