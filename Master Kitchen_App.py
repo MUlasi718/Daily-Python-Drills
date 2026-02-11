@@ -126,6 +126,32 @@ def view_security_logs():
     except FileNotFoundError:
         print(" [ERROR] No logs found. System is clean (or logs deleted).")
 
+# --- STATION 8: PRICE CHECKER (Day 10) ---
+def run_price_check():
+    print("\n" + "-"*30)
+    print("--- POS SYSTEM: PRICE CHECK ---")
+    
+    # The Database (Dictionary)
+    menu_prices = {
+        "Burger": 12.99,
+        "Fries": 3.50,
+        "Soda": 1.99,
+        "Steak": 24.99,
+        "Salad": 8.50,
+        "Salmon": 18.99,
+        "Tofu": 14.50
+    }
+    
+    # .title() fixes casing (e.g., "burger" -> "Burger")
+    item = input("Enter item to check: ").title() 
+    
+    # Look up the price
+    price = menu_prices.get(item, "Not Found")
+    
+    if price == "Not Found":
+        print(f" [ERROR] '{item}' is not in the database.")
+    else:
+        print(f" The price of {item} is: ${price}")
 
 # ==========================================
 #      MAIN CONTROL CENTER (The Loop)
@@ -139,11 +165,12 @@ while True:
     print("="*40)
     print("1. Login System (Days 1-3)")
     print("2. Firewall Check (Day 4)")
-    print("3. Password Generator (Day 6)")
-    print("4. Generate Daily Special (Day 6/7)")
-    print("5. Update Security Logs (Day 7)")
-    print("6. View Last Menu (Day 8/9) [NEW]")
-    print("7. View Security Logs (Day 8/9) [NEW]")
+    print("3. Password Generator")
+    print("4. Generate Daily Special")
+    print("5. Update Security Logs")
+    print("6. View Last Menu")
+    print("7. View Security Logs")
+    print('8. Check Item Price')
     print("Q. Quit Application")
     
     choice = input("\nSelect an option: ").upper()
@@ -162,8 +189,11 @@ while True:
         view_last_menu()
     elif choice == '7':
         view_security_logs()
+    elif choice == '8':
+        run_price_check()
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
         break  
     else:
         print("Invalid Selection. Please try again.")
+        
