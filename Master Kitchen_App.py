@@ -153,6 +153,72 @@ def run_price_check():
     else:
         print(f" The price of {item} is: ${price}")
 
+# --- STATION 9: POS SYSTEM (Day 11) ---
+def run_pos_system():
+    print("\n" + "-"*30)
+    print("--- POS SYSTEM: OPEN TAB ---")
+    
+    menu = {
+        "Burger": 12.99,
+        "Fries": 3.50,
+        "Soda": 1.99,
+        "Steak": 24.99,
+        "Salad": 8.50
+    }
+    
+    total_bill = 0
+    cart = []
+    
+    print("Menu: Burger, Fries, Soda, Steak, Salad")
+    print("Commands: '3 Burger', '2 Del Soda', 'Done'")
+    
+    while True:
+        raw_input = input("\nEnter Order: ").title()
+        
+        if raw_input == "Done":
+            break
+            
+        parts = raw_input.split()
+        qty = 1
+        item_name = raw_input
+        
+        if len(parts) > 0 and parts[0].isdigit():
+            qty = int(parts[0])
+            item_name = " ".join(parts[1:])
+            
+        for i in range(qty):
+            if item_name.startswith("Del"):
+                clean_item = item_name.replace("Del ", "")
+                if clean_item in cart:
+                    price = menu[clean_item]
+                    total_bill -= price
+                    cart.remove(clean_item)
+                    print(f" [VOID] Removed {clean_item}")
+                else:
+                    print(f" [ERROR] {clean_item} not in cart.")
+            
+            elif item_name in menu:
+                price = menu[item_name]
+                total_bill += price
+                cart.append(item_name)
+                print(f" + Added {item_name}")
+            
+            else:
+                print(f" [ERROR] Item {item_name} not found.")
+                break
+        
+        print(f" Running Total: ${total_bill:.2f}")
+
+    # Final Receipt
+    print("\n" + "-"*30)
+    print("--- FINAL RECEIPT ---")
+    unique_items = set(cart)
+    for item in unique_items:
+        q = cart.count(item)
+        print(f"{item} x {q}")
+    print(f"TOTAL DUE: ${total_bill:.2f}")
+    print("-" * 30)
+
 # ==========================================
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
@@ -160,20 +226,22 @@ def run_price_check():
 # It runs only after Python has learned all the functions above.
 
 while True:
-    print("\n" + "="*40)
+    print('\n' + '='*40)
     print("   MMADU'S KITCHEN OS - MAIN MENU")
-    print("="*40)
-    print("1. Login System (Days 1-3)")
-    print("2. Firewall Check (Day 4)")
-    print("3. Password Generator")
-    print("4. Generate Daily Special")
-    print("5. Update Security Logs")
-    print("6. View Last Menu")
-    print("7. View Security Logs")
+    print('='* 40)
+    print('1. Login System')
+    print('2. Firewall Check')
+    print('3. Password Generator')
+    print('4. Generate Daily Special')
+    print('5. Update Security Logs')
+    print('6. View Last Menu')
+    print('7. View Security Logs')
     print('8. Check Item Price')
-    print("Q. Quit Application")
-    
+    print('9. Run POS System')
+    print('Q. Quit Application')
+
     choice = input("\nSelect an option: ").upper()
+    print("Q. Quit Application")
     
     if choice == '1':
         run_login_system()
@@ -191,9 +259,13 @@ while True:
         view_security_logs()
     elif choice == '8':
         run_price_check()
+    elif choice == '9':
+        run_pos_system()
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
         break  
     else:
         print("Invalid Selection. Please try again.")
+        
+
         
