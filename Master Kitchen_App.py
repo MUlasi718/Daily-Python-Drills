@@ -1,5 +1,7 @@
+import time
+import sys
 import random
-import datetime
+import requests
 
 # --- STATION 1: IDENTITY & ACCESS (Days 1, 2, 3 & 5) ---
 def run_login_system():
@@ -219,6 +221,38 @@ def run_pos_system():
     print(f"TOTAL DUE: ${total_bill:.2f}")
     print("-" * 30)
 
+#STATION 10: API ORDER CHECK (Day 12)
+def run_api_check():
+    print('--- CONNECTING TO ORDER CLOUD ---')
+    
+    #Test URL
+    url = 'https://jsonplaceholder.typicode.com/todos/1'
+    
+    print(f'Connecting to: {url}...')
+    time.sleep(1)
+    
+    try:
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+           data = response.json()
+           
+           #Extract Data
+           ticket_num = data['id']
+           item_name = data['title']
+           is_done = data['completed']
+           
+           print(' [SUCCESS] Connection Established.\n')
+           print('--- INCOMING TICKET ---')
+           print(f' Ticket #:  {ticket_num}')
+           print(f' Item:      {item_name}')
+           print(f" Status:    {'READY' if is_done else 'PENDING'}")
+           print('----------------------------')
+        else:
+            print(f' [ERROR] Server returned: {response.status_code}')
+            
+    except Exception as e:
+        print(f' [CRITICAL ERROR] Connection failed: {e}')
 # ==========================================
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
@@ -238,6 +272,7 @@ while True:
     print('7. View Security Logs')
     print('8. Check Item Price')
     print('9. Run POS System')
+    print('10. Check Online Orders')
     print('Q. Quit Application')
 
     choice = input("\nSelect an option: ").upper()
@@ -261,6 +296,8 @@ while True:
         run_price_check()
     elif choice == '9':
         run_pos_system()
+    elif choice == '10':
+        run_api_check()
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
         break  
