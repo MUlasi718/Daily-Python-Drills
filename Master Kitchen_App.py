@@ -253,7 +253,54 @@ def run_api_check():
             
     except Exception as e:
         print(f' [CRITICAL ERROR] Connection failed: {e}')
-# ==========================================
+        
+# --- STATION 11: HOST STAND (Day 13 - Upgraded) ---
+def run_host_stand():
+    print("\n" + "-"*30)
+    print("--- HOST STAND: DOWNLOADING RESERVATIONS ---")
+    
+    url = "https://jsonplaceholder.typicode.com/users"
+    
+    #MOCK DATA
+    times = ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"]
+    notes = ["Anniversary", "Nut Allergy", "VIP", "Window Seat", "Birthday", "None"]
+
+    try:
+        print(f"Contacting: {url}...")
+        time.sleep(1)
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            guest_list = response.json()
+            
+            print(" [SUCCESS] Data Received.\n")
+            print(f" Total Guests: {len(guest_list)}")
+            
+            #HEADER
+            print("-" * 75)
+            # We use f-strings to set column width (e.g., :<20 means 20 chars wide)
+            print(f"{'TIME':<10} | {'NAME':<20} | {'PHONE':<18} | {'NOTE'}")
+            print("-" * 75)
+
+            for guest in guest_list:
+                #API DATA (From the Internet)
+                name = guest['name']
+                phone = guest['phone'].split(" ")[0] # Grabbing just the first part of phone
+                
+                #PYTHON DATA (Randomly Generated)
+                res_time = random.choice(times)
+                guest_note = random.choice(notes)
+                
+                #COMBINING DATA
+                print(f"{res_time:<10} | {name:<20} | {phone:<18} | {guest_note}")
+
+            print("-" * 75)
+        else:
+            print(f" [ERROR] Server returned: {response.status_code}")
+            
+    except Exception as e:
+        print(f" [CRITICAL ERROR] Connection failed: {e}")
+        
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 # NOTICE: This loop is at the very END. 
@@ -273,6 +320,7 @@ while True:
     print('8. Check Item Price')
     print('9. Run POS System')
     print('10. Check Online Orders')
+    print('11. Check Reservations')
     print('Q. Quit Application')
 
     choice = input("\nSelect an option: ").upper()
@@ -298,6 +346,8 @@ while True:
         run_pos_system()
     elif choice == '10':
         run_api_check()
+    elif choice == '11':
+        run_host_stand()    
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
         break  

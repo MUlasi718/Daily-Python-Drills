@@ -339,55 +339,59 @@ try:
 except Exception as e:
     print(F' [CRITICAL ERROR] Connection failed: {e}')
 
-#DAY 13: JSON Anatomy (Parsing Lists)
-    
+#Day 13: JSON Anatomy (Host Stand V2)
+#Day 13 Goal: Fetch user data and enrich it with reservation details.
+
 import requests
 import time
+import random  # <--- Need this for the random times/notes
 
-print('--- HOST STAND: DOWNLOADING RESERVATIONS ---')
+print("\n--- HOST STAND: DOWNLOADING RESERVATIONS ---")
 
-#SOURCE (List of Fake Users for testing)
-#Let's see if the URL can return a list[] and not just one object {}
+#1. THE SOURCE
+url = "https://jsonplaceholder.typicode.com/users"
 
-url = 'https://jsonplaceholder.typicode.com/users'
+#2. THE MOCK DATA (Our "House Specials")
+times = ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"]
+notes = ["Anniversary", "Nut Allergy", "VIP", "Window Seat", "Birthday", "None"]
 
 try:
-    print(f'Contacting: {url}...')
+    print(f"Contacting: {url}...")
     time.sleep(1)
     
     response = requests.get(url)
     
     if response.status_code == 200:
-       #PAYLOAD (List of Dictionaries)
-       guest_list = response.json()
-       
-       print(' [SUCCESS] Data Received.\n')
-       print(f' Total Guests Found: {len(guest_list)}')
-       print('-' * 30)
-       print(f"{'NAME':<25} | {'CITY'}:<15} | {'COMPANY'}")
-       #':<25' makes your coulumn 25 characters wide
-       print('-' * 30)
-       
-       #LOOP (Go through list one guest at a time)
-       
-       for guest in guest_list:
-           
-           #Data Extraction
-           name = guest['name']
-           city = guest['address']['city']
-           company = guest['company']['name']
-           #FORMATTING
-           print(f'{name:<25} | {city:<15} | {company}')
-           
-       print('-' * 30)
-       print('End of Report.')
-   else:
-       print(f' [ERROR] Server returned: {response.status_code}')
+        guest_list = response.json()
+        
+        print(" [SUCCESS] Data Received.\n")
+        print(f" Total Guests: {len(guest_list)}")
+        
+        #THE HEADER
+        print("-" * 75)
+        print(f"{'TIME':<10} | {'NAME':<20} | {'PHONE':<18} | {'NOTE'}")
+        print("-" * 75)
+
+        #3. THE LOOP
+        for guest in guest_list:
+            #API DATA
+            name = guest['name']
+            #Cleaning the phone number (chopping off the extension)
+            phone = guest['phone'].split(" ")[0] 
+            
+            #PYTHON DATA (Randomly Generated)
+            res_time = random.choice(times)
+            guest_note = random.choice(notes)
+            
+            #THE PLATE
+            print(f"{res_time:<10} | {name:<20} | {phone:<18} | {guest_note}")
+
+        print("-" * 75)
+        print("End of Report.")
+
+    else:
+        print(f" [ERROR] Server returned: {response.status_code}")
 
 except Exception as e:
-    print(f' [CRITICAL ERROR] Connection failed: {e}')
-    
-                        
-                        
-       
+    print(f" [CRITICAL ERROR] Connection failed: {e}")
        
