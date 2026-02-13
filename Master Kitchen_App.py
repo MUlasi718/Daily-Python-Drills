@@ -301,6 +301,44 @@ def run_host_stand():
     except Exception as e:
         print(f" [CRITICAL ERROR] Connection failed: {e}")
         
+# --- STATION 12: Reservation Search (Day 14) ---
+def run_guest_search():
+    print("\n" + "-"*40)
+    print("--- GUEST RESERVATION SEARCH ---")
+    
+    #INPUT
+    guest_id = input("Enter Guest ID (1-10): ")
+    
+    #PARAMETER (Query String)
+    url = f"https://jsonplaceholder.typicode.com/users?id={guest_id}"
+    
+    try:
+        print(f"Searching for Guest ID #{guest_id}...")
+        time.sleep(1)
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            results = response.json()
+            
+            # Check if the list is not empty
+            if len(results) > 0:
+                user = results[0] # Grab the first item
+                
+                print("\n [SUCCESS] Record Found:")
+                print("-" * 40)
+                print(f" Name:    {user['name']}")
+                print(f" Email:   {user['email']}")
+                print(f" City:    {user['address']['city']}")
+                print(f" Company: {user['company']['name']}")
+                print("-" * 40)
+            else:
+                print(f"\n [!] No record found for ID {user_id}")
+        else:
+            print(f" [ERROR] Server returned: {response.status_code}")
+            
+    except Exception as e:
+        print(f" [CRITICAL ERROR] Connection failed: {e}")        
+        
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 # NOTICE: This loop is at the very END. 
@@ -321,6 +359,7 @@ while True:
     print('9. Run POS System')
     print('10. Check Online Orders')
     print('11. Check Reservations')
+    print('12. Search Guest Database')
     print('Q. Quit Application')
 
     choice = input("\nSelect an option: ").upper()
@@ -347,7 +386,9 @@ while True:
     elif choice == '10':
         run_api_check()
     elif choice == '11':
-        run_host_stand()    
+        run_host_stand()
+    elif choice == '12':
+        run_guest_search()    
     elif choice == 'Q':
         print("System Shutting Down. Goodbye Chef.")
         break  

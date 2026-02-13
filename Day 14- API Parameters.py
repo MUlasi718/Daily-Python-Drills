@@ -348,11 +348,10 @@ import random  # <--- Need this for the random times/notes
 
 print("\n--- HOST STAND: DOWNLOADING RESERVATIONS ---")
 
-#1. THE SOURCE
-user_id = input('Enter Guest ID (1-10): ')
-url = f"https://jsonplaceholder.typicode.com/users?id={user_id}"
+#SOURCE
+url = "https://jsonplaceholder.typicode.com/users"
 
-#2. THE MOCK DATA (Our "House Specials")
+#MOCK DATA
 times = ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"]
 notes = ["Anniversary", "Nut Allergy", "VIP", "Window Seat", "Birthday", "None"]
 
@@ -368,12 +367,12 @@ try:
         print(" [SUCCESS] Data Received.\n")
         print(f" Total Guests: {len(guest_list)}")
         
-        #THE HEADER
+        #HEADER
         print("-" * 75)
         print(f"{'TIME':<10} | {'NAME':<20} | {'PHONE':<18} | {'NOTE'}")
         print("-" * 75)
 
-        #3. THE LOOP
+        #LOOP
         for guest in guest_list:
             #API DATA
             name = guest['name']
@@ -389,6 +388,50 @@ try:
 
         print("-" * 75)
         print("End of Report.")
+
+    else:
+        print(f" [ERROR] Server returned: {response.status_code}")
+
+except Exception as e:
+    print(f" [CRITICAL ERROR] Connection failed: {e}")
+    
+#Day 14: API Parameters (The Search Bar)
+#Day 14 Goal: Filter data using Query Strings (e.g. ?id=5)
+
+import requests
+import time
+
+print("\n--- ONLINE RESERVATIONS ---")
+
+#INPUT (The Filter)
+user_id = input("Guest ID (1-10): ")
+
+#PARAMETERS (The Query String)
+#We attach ?id={number} to tell the API exactly who we want.
+url = f"https://jsonplaceholder.typicode.com/users?id={user_id}"
+
+try:
+    print(f"Searching Database for Guest ID #{user_id}...")
+    time.sleep(1)
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        results = response.json()
+        
+        #Check if we actually found anyone
+        if len(results) > 0:
+            user = results[0] #Grab the first (and only) result
+            
+            print("\n [SUCCESS] Guest Found:")
+            print("-" * 40)
+            print(f" Name:    {user['name']}")
+            print(f" Email:   {user['email']}")
+            print(f" City:    {user['address']['city']}")
+            print(f" Company: {user['company']['name']}")
+            print("-" * 40)
+        else:
+            print(f"\n [!] No guest found with ID {user_id}")
 
     else:
         print(f" [ERROR] Server returned: {response.status_code}")
