@@ -1,23 +1,28 @@
 import time
 import sys
 import random
-import requests
+import datetime
+import requests 
+
+#CONFIGURATION
+#PASTE YOUR SPOONACULAR API KEY BELOW
+SPOON_KEY = "c5bcb06058224f0193c38272d143e1c2" 
 
 # --- STATION 1: IDENTITY & ACCESS (Days 1, 2, 3 & 5) ---
 def run_login_system():
     print("\n" + "-"*30)
     print("--- STARTING LOGIN SYSTEM ---")
     
-    # Day 1: Input
+    #Day 1: Input
     Username = input("Enter username: ")
     Password = input("Enter password: ")
     
-    # Masking
+    #Masking
     mask = '*' * len(Password)
     print(f"User: {Username}")
     print(f"Pass: {mask}")
     
-    # Day 2: Role Check
+    #Day 2: Role Check
     if Username == 'John Doe':
         user_role = 'Admin'
     elif Username == 'M Ulasi':
@@ -26,7 +31,7 @@ def run_login_system():
         user_role = 'Guest'
     print(f"System: Recognized as [{user_role}]")
 
-    # Day 3: Brute Force Loop
+    #Day 3: Brute Force Loop
     correct_target = Password
     attempts = 0
     max_attempts = 3
@@ -301,7 +306,7 @@ def run_host_stand():
     except Exception as e:
         print(f" [CRITICAL ERROR] Connection failed: {e}")
         
-# --- STATION 12: Reservation Search (Day 14) ---
+# --- STATION 12: GUEST SEARCH (Day 14) ---
 def run_guest_search():
     print("\n" + "-"*40)
     print("--- GUEST RESERVATION SEARCH ---")
@@ -338,12 +343,77 @@ def run_guest_search():
             
     except Exception as e:
         print(f" [CRITICAL ERROR] Connection failed: {e}")        
+
+# --- STATION 13: RECIPE COST CALCULATOR (Day 15) ---
+def run_recipe_cost_calculator():
+    print("\n" + "-"*40)
+    print("--- RECIPE COST CALCULATOR ---")
+    
+    query = input("Enter dish to search (e.g. Pasta, Steak): ")
+    
+    #SEARCH PARAMETERS
+    url = "https://api.spoonacular.com/recipes/complexSearch"
+    params = {
+        "apiKey": SPOON_KEY,
+        "query": query,
+        "number": 10, # Fetch 10 options
+        "addRecipeInformation": True
+    }
+    
+    try:
+        print(f"Searching Spoonacular for '{query}'...")
+        response = requests.get(url, params=params)
         
+        if response.status_code != 200:
+            print(f" [ERROR] API Status: {response.status_code}")
+            return
+
+        data = response.json()
+        results = data['results']
+        
+        if not results:
+            print(" [!] No recipes found.")
+            return
+
+        #DISPLAY MENU
+        print(f"\n [SUCCESS] Found {len(results)} recipes:\n")
+        for i, recipe in enumerate(results, 1):
+            print(f" {i}. {recipe['title']} (Time: {recipe['readyInMinutes']}m)")
+            
+        print("-" * 40)
+        
+        #DYNAMIC SELECTION
+        choice = input(f"Select a recipe number (1-{len(results)}): ")
+        
+        if choice.isdigit() and 1 <= int(choice) <= len(results):
+            selected = results[int(choice) - 1]
+            print(f"\nFetching cost data for '{selected['title']}'...")
+            
+            #DETAILS (Financials)
+            id_url = f"https://api.spoonacular.com/recipes/{selected['id']}/information"
+            #We must pass the key again for the second request
+            detail_response = requests.get(id_url, params={"apiKey": SPOON_KEY})
+            info = detail_response.json()
+            
+            print("\n" + "="*50)
+            print(f" RECIPE CARD: {info['title'].upper()}")
+            print(f" Servings: {info['servings']}")
+            #Divide by 100 because API gives price in cents
+            print(f" Price Per Serving: ${info['pricePerServing']/100:.2f}") 
+            print("-" * 50)
+            print(" INGREDIENTS:")
+            for ing in info['extendedIngredients']:
+                print(f" [ ] {ing['original']}")
+            print("="*50)
+            
+        else:
+            print(" [!] Invalid selection.")
+
+    except Exception as e:
+        print(f" [CRITICAL ERROR] Connection failed: {e}")
+
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
-# NOTICE: This loop is at the very END. 
-# It runs only after Python has learned all the functions above.
-
 while True:
     print('\n' + '='*40)
     print("   MMADU'S KITCHEN OS - MAIN MENU")
@@ -360,10 +430,10 @@ while True:
     print('10. Check Online Orders')
     print('11. Check Reservations')
     print('12. Search Guest Database')
+    print('13. Calculate Recipe Cost')
     print('Q. Quit Application')
 
-    choice = input("\nSelect an option: ").upper()
-    print("Q. Quit Application")
+    choice = input('\nSelect an option: ').upper()
     
     if choice == '1':
         run_login_system()
@@ -388,12 +458,11 @@ while True:
     elif choice == '11':
         run_host_stand()
     elif choice == '12':
-        run_guest_search()    
+        run_guest_search()  
+    elif choice == '13':
+        run_recipe_cost_calculator()
     elif choice == 'Q':
-        print("System Shutting Down. Goodbye Chef.")
+        print('System Shutting Down. Goodbye Chef.')
         break  
     else:
-        print("Invalid Selection. Please try again.")
-        
-
-        
+        print('Invalid Selection. Please try again.')
