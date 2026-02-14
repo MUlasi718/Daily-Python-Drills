@@ -439,3 +439,62 @@ try:
 except Exception as e:
     print(f" [CRITICAL ERROR] Connection failed: {e}")
        
+       
+#Day 15: API Keys (The Real Deal)
+#Day 15 Goal: Authenticate with Spoonacular to search for real recipes.
+
+import requests
+
+print('\n--- KITCHEN OS: RECIPE SEARCH ---')
+
+#SETUP
+# Paste your Spoonacular Key inside the quotes below:
+api_key = "c5bcb06058224f0193c38272d143e1c2" 
+
+#URL for searching recipes
+url = "https://api.spoonacular.com/recipes/complexSearch"
+
+#INPUT
+query = input("Enter dish to search (e.g. Pasta, Steak): ")
+
+#ORDER TICKET (Parameters)
+#Our Key and our Search Term are saved in a dictionary.
+#'number': 5 means "Give me 5 results".
+#'addRecipeInformation': True means "Give me the details (time, health score)".
+params = {
+    "apiKey": api_key,
+    "query": query,
+    "number": 5,
+    "addRecipeInformation": True
+}
+
+try:
+    print(f"Searching Spoonacular Database for '{query}'...")
+    
+    #THE REQUEST
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        results = data['results']
+        
+        print(f" [SUCCESS] Found {len(results)} recipes.\n")
+        
+        for recipe in results:
+            print("-" * 50)
+            print(f" TITLE:  {recipe['title']}")
+            print(f" TIME:   {recipe['readyInMinutes']} mins")
+            print(f" HEALTH: {recipe['healthScore']}/100")
+            print(f" ID:     {recipe['id']}") # We need this ID to get ingredients later!
+            
+        print("-" * 50)
+        
+    elif response.status_code == 401:
+        print(' [401] UNAUTHORIZED. Check your API Key.')
+    elif response.status_code == 402:
+        print(' [402] PAYMENT REQUIRED. You hit the daily free limit.')
+    else:
+        print(f' [ERROR] Status Code: {response.status_code}')
+
+except Exception as e:
+    print(f" [CRITICAL ERROR] Connection failed: {e}")
