@@ -2,7 +2,9 @@ import time
 import sys
 import random
 import datetime
-import requests 
+import requests
+import csv
+import sqlite3
 
 #CONFIGURATION
 #PASTE YOUR SPOONACULAR API KEY BELOW
@@ -344,35 +346,30 @@ def run_guest_search():
     except Exception as e:
         print(f" [CRITICAL ERROR] Connection failed: {e}")        
 
-# --- STATION 13: RECIPE COST CALCULATOR (Day 15) ---
+# --- STATION 13: RECIPE COST CALCULATOR (Integrated) ---
 def run_recipe_cost_calculator():
-    print("\n" + "-"*40)
-    print("--- RECIPE COST CALCULATOR ---")
+    print('\n' + '-'*40)
+    print('--- RECIPE COST CALCULATOR ---')
     
-    query = input("Enter dish to search (e.g. Pasta, Steak): ")
+    query = input('Enter dish to search (e.g. Pasta, Steak): ')
     
     #SEARCH PARAMETERS
     url = "https://api.spoonacular.com/recipes/complexSearch"
     params = {
-        "apiKey": SPOON_KEY,
-        "query": query,
-        "number": 10, # Fetch 10 options
-        "addRecipeInformation": True
+        'apiKey': "c5bcb06058224f0193c38272d143e1c2",
+        'query': query,
+        'number': 10,
+        'addRecipeInformation': True
     }
     
     try:
         print(f"Searching Spoonacular for '{query}'...")
         response = requests.get(url, params=params)
-        
-        if response.status_code != 200:
-            print(f" [ERROR] API Status: {response.status_code}")
-            return
-
         data = response.json()
         results = data['results']
         
         if not results:
-            print(" [!] No recipes found.")
+            print(' [!] No recipes found.')
             return
 
         #DISPLAY MENU
@@ -380,38 +377,83 @@ def run_recipe_cost_calculator():
         for i, recipe in enumerate(results, 1):
             print(f" {i}. {recipe['title']} (Time: {recipe['readyInMinutes']}m)")
             
-        print("-" * 40)
+        print('-' * 40)
         
-        #DYNAMIC SELECTION
+        #SELECT & FETCH
         choice = input(f"Select a recipe number (1-{len(results)}): ")
         
         if choice.isdigit() and 1 <= int(choice) <= len(results):
             selected = results[int(choice) - 1]
-            print(f"\nFetching cost data for '{selected['title']}'...")
             
-            #DETAILS (Financials)
+            #FULL DETAILS (For Price)
             id_url = f"https://api.spoonacular.com/recipes/{selected['id']}/information"
-            #We must pass the key again for the second request
             detail_response = requests.get(id_url, params={"apiKey": SPOON_KEY})
             info = detail_response.json()
             
+            #CALCULATE REAL NUMBERS
+            cost_price = info['pricePerServing'] / 100
+            sell_price = cost_price * 3  #Standard 30% Food Cost Rule
+            profit = sell_price - cost_price
+            
+            #PRINT TO SCREEN
             print("\n" + "="*50)
             print(f" RECIPE CARD: {info['title'].upper()}")
-            print(f" Servings: {info['servings']}")
-            #Divide by 100 because API gives price in cents
-            print(f" Price Per Serving: ${info['pricePerServing']/100:.2f}") 
-            print("-" * 50)
-            print(" INGREDIENTS:")
-            for ing in info['extendedIngredients']:
-                print(f" [ ] {ing['original']}")
-            print("="*50)
+            print(f' Cost:   ${cost_price:.2f}')
+            print(f' Price:  ${sell_price:.2f} (Recommended)')
+            print(f' Profit: ${profit:.2f}')
+            print('='*50)
+            
+            #INTEGRATION (Saving to CSV)
+            save = input('Save this to financial log? (y/n): ')
+            if save.lower() == 'y':
+                with open("kitchen_financials.csv", "a", newline="") as file:
+                    writer = csv.writer(file)
+                    #We write: Name, Cost, Price, Profit
+                    writer.writerow([info['title'], round(cost_price,2), round(sell_price,2), round(profit,2)])
+                print(" [SAVED] Log updated.")
             
         else:
             print(" [!] Invalid selection.")
 
     except Exception as e:
-        print(f" [CRITICAL ERROR] Connection failed: {e}")
-
+        print(f" [CRITICAL ERROR] {e}")
+        
+# --- STATION 14: INVENTORY MANAGER (Day 18) ---
+def run_inventory_manager():
+    print("\n" + "-"*40)
+    print("--- INVENTORY MANAGEMENT SYSTEM ---")
+    
+    #CONNECT
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+        
+        #VIEW STOCK
+        print("Fetching live inventory...")
+        cursor.execute("SELECT * FROM inventory")
+        items = cursor.fetchall()
+        
+        if not items:
+            print(" [!] Inventory is empty.")
+        else:
+            print(f"\n [SUCCESS] Database Online. Found {len(items)} items:\n")
+            print("-" * 50)
+            print(f"{'ID':<5} | {'ITEM':<20} | {'PRICE':<10} | {'STOCK'}")
+            print("-" * 50)
+            
+            for item in items:
+                #item = (id, name, price, stock)
+                print(f"{item[0]:<5} | {item[1]:<20} | ${item[2]:<9.2f} | {item[3]}")
+                
+            print("-" * 50)
+            
+    except sqlite3.Error as e:
+        print(f" [CRITICAL ERROR] Database offline: {e}")
+        
+    finally:
+        if conn:
+            conn.close()
+            print("\n [SECURE] Database connection closed.")        
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 while True:
@@ -431,6 +473,7 @@ while True:
     print('11. Check Reservations')
     print('12. Search Guest Database')
     print('13. Calculate Recipe Cost')
+    print('14. View Inventory')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -461,6 +504,8 @@ while True:
         run_guest_search()  
     elif choice == '13':
         run_recipe_cost_calculator()
+    elif choice == '14':
+        run_inventory_manager()
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
