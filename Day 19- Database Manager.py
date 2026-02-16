@@ -1,0 +1,760 @@
+#Mmadu Ulasi Daily Python Drill (Day 1/2)
+
+import requests  # <--- The Waiter (API Tool)
+import random    # <--- The RNG (Password Generator)
+import time      # <--- The Clock (Delays)
+import datetime  # <--- The Calendar (Logging)
+
+
+#Day 1 Drill: Variables & Input (Masked Login)
+#Day 1 Goal: Write a script that asks for a 'username' and 'password' and prints them back masked
+
+
+# 1. The Prompt
+
+Username = input("Enter username: ")
+Password = input("Enter password: ")
+
+# 2. The Logic
+mask = '*' * len(Password)
+
+# 3. The Output
+print(f"User: {Username}")
+print(f"Pass: {mask}")
+
+#Day 2 Drill: Logic Gates (Access Control)
+#Day 2 Goal: Create a script that checks if a user is 'Admin','User', or 'Guest' and grants diffferent access levels using if/else
+
+if Username == 'John Doe':
+    user_role = 'Admin'   # John gets the Admin badge
+elif Username == 'M Ulasi':
+    user_role = 'User'    # M gets the User badge
+else:
+    user_role = 'Guest'   # Everyone else gets the Guest badge
+
+print(f"System: User recognized as role [{user_role}]")
+
+# --- STEP 2: Check the Role ---
+if user_role == 'Admin':
+    print('Access Granted: Full Control')
+
+elif user_role == 'User':
+    print('Access Granted: Read Only')
+
+else:
+    print('Access Denied: Get On Up Outta Here!')
+    
+    
+#Day 3 Drill: The Loop (Brute Force Stopper)
+#Day 3 Goal: Write a loop that asks the user for a password. After 3 failed attempts, the user will be locked out.
+    
+
+correct_target = Password
+attempts = 0
+max_attempts = 3
+
+while attempts < max_attempts:
+    
+    #Ask for password
+    
+    user_input = input("Please re-enter password to verify: ")
+    
+    #Check for match
+    
+    if user_input == correct_target:
+        print("Access Granted. Whattup tho?")
+        
+        break
+    
+    else:
+        print("Wrong Password. Try again.")
+        attempts = attempts + 1 #1 acts as the counter. Once it reaches 3, the user will be locked out.
+        
+    if attempts == max_attempts:
+        print("SYSTEM LOCKED! Dash wey yuhself.")
+
+#Day 4 Drill: IP Whitelist
+#Day 4 Drill Goals: Create a list of 'allowed IPs.' Write a script that checks if a new IP input exists in that list.
+        
+print("FIREWALL SYSTEM STARTING...")
+
+allowed_ips = ["192.168.1.1","10.0.5.1","172.16.0.55","111.111.1.0"]
+
+allowed_ips.append("10.0.0.99")
+
+print(f"Allowed IPs: {allowed_ips}")
+
+user_ip = input("Enter IP Address to Verify: ")
+
+if user_ip in allowed_ips:
+    print("Access Granted: IP matches whitelist.")
+else:
+    print("Access Denied: Your IP is not authorized.")
+    
+    
+# Day 5 Drill: Functions (The Login Station)
+# Day 5 Goal: Refactor the Day 2 'Role Check' logic into a reusable function. The function should accept a 'username' and return the corresponding role.
+
+def check_permission(name):
+    
+    if name == 'John Doe':
+        return 'User'
+    
+    else:
+        return 'Guest'
+    
+    
+user_input = input('Enter username to check: ')
+
+status = check_permission(user_input)
+
+print(f'Access Level: {status}')
+
+print("Running automated security acan on 'Hacker'...")
+print(check_permission('Hacker'))
+
+#Day 6 Drill: Libraries
+#Day 6 Goals: Build a Random Password Generator
+
+import random
+
+print("SECURE PASSWORD GENERATOR")
+
+options = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%"
+
+password_list = random.choices(options, k=12)
+
+final_password = "".join(password_list)
+
+print(f"Generated Secure Password : {final_password}")
+
+#Day 6 Part 2: The Project (KM App)
+#Day 6 Part 2 Goals: Generate "Chef Daily Special" using same random function.
+
+print("CHEF: DAILY SPECIAL")
+
+proteins = ["Chicken", "Beef", "Salmon", "Tofu"]
+sides = ["Rice", "Broccoli", "Potatoes", "Asparagus"]
+sauces = ["Teriyaki", "Garlic Butter", "Spicy Mayo", "Pesto"]
+
+p = random.choice(proteins)
+s = random.choice(sides)
+z = random.choice(sauces)
+
+print(f"Today's Special: Pan-seared {p} with {s} and {z} drizzle.")
+
+# Day 7 Drill: File I/O (Persistence)
+# Day 7 Goal: Write a script that saves a log entry to a text file (Append Mode) and updates a daily menu file (Write Mode).
+
+import datetime
+
+print("--- LOGGING SYSTEM ACTIVATED ---")
+
+current_time = datetime.datetime.now()
+log_entry = f"LOGIN EVENT : {current_time} - User: Admin\n"
+
+with open("security_log.txt", "a") as file:
+    file.write(log_entry)
+
+print(f" [SUCCESS] Log entry appended to 'security_log.txt'")
+
+#Day 7 Part 2: The Daily Menu (Write Mode)
+#Day 7 Part 2 Goal: Write a script that overwrites the previous menu file with a new daily special.
+
+daily_special = "Grilled Salmon with Asparagus"
+
+with open("daily_menu.txt", "w") as file:
+    file.write("--- TODAY'S SPECIAL ---\n")
+    file.write(daily_special)
+    file.write("\n--------------------")
+    
+print(f" [SUCCESS] Menu overwritten in 'daily_menu.txt'")
+
+#Day 8 & 9 Drill: File Reading & Error Handling
+#Day 8 & 9 Goal: safely read a file. If it doesn't exist, handle the error gracefully instead of crashing.
+
+import time
+
+print('--- KITCHEN OPENING PROTOCOL ---')
+
+filename = 'prep_list.txt'
+
+try:
+    print(f'Searching for {filename}...')
+    time.sleep(1)
+    
+    with open(filename, 'r') as file:
+        content = file.read()
+        print('\n[SUCCESS] Prep List Found:')
+        print(content)
+        
+except FileNotFoundError:
+    print(f'\n[ERROR] {filename} not found!')
+    print('Action: Creating a new emergency prep list...')
+    
+    with open(filename, "w") as file:
+        file.write('- Dice Onions\n- Peep Carrots\n- Stock Check')
+        
+    print(' [SAVED] New prep list created.')
+    
+#Day 10 Drill: Dictionaries (Key-Value Pairs)
+#Goal: Create a menu pricing system that looks up values based on a key.
+
+print("--- POS SYSTEM: PRICE CHECK ---")
+
+#THE DATA (Dictionary)
+#Use Curly Braces {} for dictionaries.
+menu_prices = {
+    "Burger": 12.99,
+    "Fries": 3.50,
+    "Soda": 1.99,
+    "Steak": 24.99,
+    "Salad": 8.50
+}
+
+#THE INPUT
+order = input("Enter item to check price: ")
+
+#LOGIC (Safe Lookup)
+#If we just ask menu_prices[order], it crashes if the item isn't there.
+#use .get() which allows a fallback message.
+
+price = menu_prices.get(order, "Not Found")
+
+#OUTPUT
+if price == "Not Found":
+    print(f" [ERROR] Item '{order}' is not on the menu.")
+else:
+    print(f" The price of {order} is: ${price}")
+
+
+#Day 11 Drill: Loops + Dictionaries (The Shopping Cart)
+#Goal: Allow a user to add multiple items and calculate the total cost.
+
+print('--- POS SYSTEM: OPEN TAB ---')
+
+menu = {
+    "Burger": 12.99,
+    "Fries": 3.50,
+    "Soda": 1.99,
+    "Steak": 24.99,
+    "Salad": 8.50
+}
+
+#Ledger(Cart, Starts at zero)
+total_bill = 0
+cart = [] #Item names will be listed here, with the prices.
+
+print('Menu: Burger, Fries, Soda, Steak, Salad')
+print("Type 'done' to finish order.\n")
+
+#Loop
+while True:
+    raw_input = input("Enter Command (e.g. '3 Burger' or 'Del Burger'): ").title()
+
+    #EXIT CHECK
+    if raw_input == "Done":
+        break
+
+    #PARSE QUANTITY (The Logic Splitter)
+    #We assume quantity is 1 unless we find a number
+    parts = raw_input.split() 
+    qty = 1
+    item_name = raw_input # Default: the whole input is the name
+
+    #Check if the first word is a number (like "3")
+    if len(parts) > 0 and parts[0].isdigit():
+        qty = int(parts[0])             #Extract the number (3)
+        item_name = " ".join(parts[1:]) #Extract the rest ("Burger")
+
+    #EXECUTE THE ORDER (Runs 'qty' times)
+    for i in range(qty):
+        
+        #VOID LOGIC
+        if item_name.startswith("Del"):
+            # Clean up the name (remove "Del " from "Del Burger")
+            # We use replace() here to be safe
+            clean_item = item_name.replace("Del ", "")
+            
+            if clean_item in cart:
+                price = menu[clean_item]
+                total_bill -= price
+                cart.remove(clean_item)
+                print(f" [VOID] Removed {clean_item} (-${price})")
+            else:
+                print(f" [ERROR] {clean_item} is not in the cart!")
+
+        #ADD LOGIC
+        elif item_name in menu:
+            price = menu[item_name]
+            total_bill += price
+            cart.append(item_name)
+            print(f" + Added {item_name} (${price})")
+            
+        #ERROR LOGIC
+        else:
+            print(f" [ERROR] We don't serve '{item_name}'.")
+            break #Stop the loop so we don't print the error 3 times
+
+    #Show running total after the loop finishes
+    print(f" Running Total: ${total_bill:.2f}")
+    
+#DAY 12: APIs
+#Day 12 Goals: Connect to a reliable test server to prove the system works,
+
+import requests
+import time
+
+print('\n--- KITCHEN OS: CONNECTIVITY CHECK ---')
+
+#JSON Placeholder
+url = 'https://jsonplaceholder.typicode.com/todos/1'
+
+print(f'Connecting to {url}...')
+time.sleep(1)
+
+try:
+   #Standard request
+   response = requests.get(url)
+   
+   #The Check
+   if response.status_code ==200:
+      data = response.json()
+      
+      #Parsone the JSON
+      task_id = data['id']
+      task_title = data['title']
+      status = data['completed']
+      
+      print(' [SUCCESS] Connection Established.\n')
+      print('--- INCOMING ORDER TICKET ---')
+      print(f' TICKET #:  {task_id}')
+      print(f' ITEM:      {task_title}')
+      print(f' COMPLETED: {status}')
+      print('-----------------------------')
+      
+   else:
+        print(f' [ERROR] Server returned status: {response.status_code}')
+        
+except Exception as e:
+    print(F' [CRITICAL ERROR] Connection failed: {e}')
+
+#Day 13: JSON Anatomy (Host Stand V2)
+#Day 13 Goal: Fetch user data and enrich it with reservation details.
+
+import requests
+import time
+import random  # <--- Need this for the random times/notes
+
+print("\n--- HOST STAND: DOWNLOADING RESERVATIONS ---")
+
+#SOURCE
+url = "https://jsonplaceholder.typicode.com/users"
+
+#MOCK DATA
+times = ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"]
+notes = ["Anniversary", "Nut Allergy", "VIP", "Window Seat", "Birthday", "None"]
+
+try:
+    print(f"Contacting: {url}...")
+    time.sleep(1)
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        guest_list = response.json()
+        
+        print(" [SUCCESS] Data Received.\n")
+        print(f" Total Guests: {len(guest_list)}")
+        
+        #HEADER
+        print("-" * 75)
+        print(f"{'TIME':<10} | {'NAME':<20} | {'PHONE':<18} | {'NOTE'}")
+        print("-" * 75)
+
+        #LOOP
+        for guest in guest_list:
+            #API DATA
+            name = guest['name']
+            #Cleaning the phone number (chopping off the extension)
+            phone = guest['phone'].split(" ")[0] 
+            
+            #PYTHON DATA (Randomly Generated)
+            res_time = random.choice(times)
+            guest_note = random.choice(notes)
+            
+            #THE PLATE
+            print(f"{res_time:<10} | {name:<20} | {phone:<18} | {guest_note}")
+
+        print("-" * 75)
+        print("End of Report.")
+
+    else:
+        print(f" [ERROR] Server returned: {response.status_code}")
+
+except Exception as e:
+    print(f" [CRITICAL ERROR] Connection failed: {e}")
+    
+#Day 14: API Parameters (The Search Bar)
+#Day 14 Goal: Filter data using Query Strings (e.g. ?id=5)
+
+import requests
+import time
+
+print("\n--- ONLINE RESERVATIONS ---")
+
+#INPUT (The Filter)
+user_id = input("Guest ID (1-10): ")
+
+#PARAMETERS (The Query String)
+#We attach ?id={number} to tell the API exactly who we want.
+url = f"https://jsonplaceholder.typicode.com/users?id={user_id}"
+
+try:
+    print(f"Searching Database for Guest ID #{user_id}...")
+    time.sleep(1)
+    
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        results = response.json()
+        
+        #Check if we actually found anyone
+        if len(results) > 0:
+            user = results[0] #Grab the first (and only) result
+            
+            print("\n [SUCCESS] Guest Found:")
+            print("-" * 40)
+            print(f" Name:    {user['name']}")
+            print(f" Email:   {user['email']}")
+            print(f" City:    {user['address']['city']}")
+            print(f" Company: {user['company']['name']}")
+            print("-" * 40)
+        else:
+            print(f"\n [!] No guest found with ID {user_id}")
+
+    else:
+        print(f" [ERROR] Server returned: {response.status_code}")
+
+except Exception as e:
+    print(f" [CRITICAL ERROR] Connection failed: {e}")
+       
+       
+#Day 15: API Keys (The Smart Menu)
+#Day 15 Goal: Search recipes and select one by number to get the prep list.
+
+import requests
+
+#CONFIGURATION
+api_key = 'c5bcb06058224f0193c38272d143e1c2'
+base_url = 'https://api.spoonacular.com/recipes/complexSearch'
+detail_url = 'https://api.spoonacular.com/recipes/{}/information'
+
+print('\n--- KITCHEN OS: RECIPE SEARCH ---')
+
+#SEARCH
+query = input('Enter dish to search (e.g. Pasta, Steak): ')
+
+params = {
+    'apiKey': api_key,
+    'query': query,
+    'number': 10,
+    'addRecipeInformation': True
+}
+
+try:
+    print(f"Searching for '{query}'...")
+    response = requests.get(base_url, params=params)
+    data = response.json()
+    results = data['results']
+
+    if not results:
+        print('No recipes found.')
+    else:
+        #MENU DISPLAY (Using enumerate to number them 1-10)
+        print(f"\n [SUCCESS] Found {len(results)} recipes:\n")
+        
+        for i, recipe in enumerate(results, 1):
+            print(f" {i}. {recipe['title']} (Time: {recipe['readyInMinutes']}m)")
+
+        print('-' * 50)
+
+        #SELECTION
+        choice = input(f"Select a recipe number (1-{len(results)}): ")
+
+        #VALIDATION & FETCH
+        if choice.isdigit() and 1 <= int(choice) <= len(results):
+            index = int(choice) - 1  # Convert "1" to index 0
+            selected_recipe = results[index]
+            recipe_id = selected_recipe['id']
+            
+            print(f"\nFetching ingredients for '{selected_recipe['title']}'...")
+            
+            #DETAILS REQUEST
+            #We use the ID we just grabbed to ask for specific info
+            info_response = requests.get(detail_url.format(recipe_id), params={"apiKey": api_key})
+            info_data = info_response.json()
+            
+            print('\n' + '='*50)
+            print(f" RECIPE CARD: {info_data['title'].upper()}")
+            print(f" Servings: {info_data['servings']}")
+            print(f" Price Per Serving: ${info_data['pricePerServing']/100:.2f}")
+            print('-' * 50)
+            print(' INGREDIENTS:')
+            
+            for ingredient in info_data['extendedIngredients']:
+                print(f" [ ] {ingredient['original']}")
+                
+            print('='*50)
+            
+        else:
+            print(' [!] Invalid selection. Please type a number from the list.')
+
+except Exception as e:
+    print(f' [CRITICAL ERROR] {e}')
+    
+#Day 16: Exporting to Excel (CSV)
+#Day 16 Goal: Take a list of menu items and save them to a spreadsheet.
+
+import csv
+
+print("--- EXPORTING MENU DATA ---")
+
+#THE DATA
+#This simulates the data we calculated yesterday.
+menu_data = [
+    {"item": "Leek Soup", "cost": 6.61, "price": 14.00, "profit": 7.39},
+    {"item": "Burger",    "cost": 4.50, "price": 16.00, "profit": 11.50},
+    {"item": "Pasta",     "cost": 3.20, "price": 18.00, "profit": 14.80},
+    {"item": "Steak",     "cost": 12.00,"price": 35.00, "profit": 23.00}
+]
+
+#THE FILENAME
+filename = "kitchen_financials.csv"
+
+#WRITING THE FILE
+try:
+    #"w" = Write Mode (Create new file or overwrite)
+    #newline="" is required on Mac/Windows to prevent blank lines
+    with open(filename, "w", newline="") as file:
+        
+        #ACREATE HEADER
+        #We tell Python what the column headers are
+        headers = ["item", "cost", "price", "profit"]
+        writer = csv.DictWriter(file, fieldnames=headers)
+        
+        #WRITE HEADERS
+        writer.writeheader()
+        
+        #WRITE DATA
+        writer.writerows(menu_data)
+        
+    print(f" [SUCCESS] Data saved to '{filename}'")
+    print(" Check your folder. You should see a new Excel file.")
+
+except Exception as e:
+    print(f" [ERROR] Could not save file: {e}")
+    
+#Day 17: Intro to SQLite (The Filing Cabinet)
+#Day 17 Goal: Create a permanent database and a table for Inventory.
+
+import sqlite3
+
+print("--- INITIALIZING DATABASE ---")
+
+#CONNECT
+#This creates 'kitchen.db' if it doesn't exist.
+conn = sqlite3.connect("kitchen.db")
+
+#Day 18: View Inventory (SQL Select)
+#Day 18 Goal: Read and display data from the kitchen.db database.
+
+import sqlite3
+
+print("--- STATION 18: INVENTORY VIEWER ---")
+
+#CONNECT TO VAULT
+try:
+    conn = sqlite3.connect("kitchen.db")
+    cursor = conn.cursor()
+
+    #RUN THE QUERY
+    #"SELECT *" means "Grab everything"
+    cursor.execute("SELECT * FROM inventory")
+
+    #FETCH RESULTS
+    #.fetchall() takes the data from the cursor and puts it into a list
+    items = cursor.fetchall()
+
+    print(f"\n [SUCCESS] Found {len(items)} items in stock:\n")
+    print("-" * 50)
+    print(f"{'ID':<5} | {'ITEM':<15} | {'PRICE':<10} | {'STOCK'}")
+    print("-" * 50)
+
+    #DISPLAY LOOP
+    for item in items:
+        #item is a tuple: (1, 'Burger', 12.5, 50)
+        item_id = item[0]
+        name = item[1]
+        price = item[2]
+        stock = item[3]
+        
+        print(f"{item_id:<5} | {name:<15} | ${price:<9.2f} | {stock}")
+
+    print("-" * 50)
+
+except Exception as e:
+    print(f" [ERROR] Could not read database: {e}")
+
+finally:
+    conn.close()
+    print("\n Database Connection Closed.")
+
+#THE CURSOR
+#The 'cursor' is the tool that actually goes into the database to do work.
+cursor = conn.cursor()
+
+#CREATE A TABLE
+#We use SQL (Structured Query Language) here.
+command = """
+CREATE TABLE IF NOT EXISTS inventory (
+    item_id INTEGER PRIMARY KEY,
+    name TEXT,
+    price REAL,
+    stock_count INTEGER
+)
+"""
+
+try:
+    print(" Creating 'inventory' table...")
+    cursor.execute(command) 
+    
+    #INSERT DATA
+    print(" Adding initial stock...")
+    
+    #We use a list of tuples for bulk insertion
+    initial_stock = [
+        ('Burger', 12.50, 50),
+        ('Fries', 3.50, 100),
+        ('Steak', 25.00, 20),
+        ('Soda', 1.99, 200)
+    ]
+    
+    #.executemany() is faster than writing a loop
+    cursor.executemany('INSERT INTO inventory (name, price, stock_count) VALUES (?, ?, ?)', initial_stock)
+    
+    #COMMIT
+    #Vital Step: If you don't commit, the data vanishes.
+    conn.commit()
+    print(' [SUCCESS] Database updated.')
+
+except Exception as e:
+    print(f' [ERROR] Database failure: {e}')
+
+finally:
+    #CLOSE CONNECTION
+    conn.close()
+    print(' Connection Closed.')
+    
+#Day 19: Database Manager (Update & Delete)
+#Day 19 Goal: Modify data inside the kitchen.db using SQL.
+
+import sqlite3
+
+#The database file we are managing
+db_file = "kitchen.db"
+
+# --- FUNCTION 1: VIEW (Read) ---
+def view_inventory():
+    #Connect specifically for this task
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM inventory")
+    items = cursor.fetchall()
+    
+    print(f"\n--- CURRENT INVENTORY ---")
+    print(f"{'ID':<5} | {'ITEM':<15} | {'PRICE':<10} | {'STOCK'}")
+    print("-" * 50)
+    for item in items:
+        #item is (id, name, price, stock)
+        print(f"{item[0]:<5} | {item[1]:<15} | ${item[2]:<9.2f} | {item[3]}")
+    print("-" * 50)
+    
+    conn.close()
+
+# --- FUNCTION 2: UPDATE (Modify) ---
+def update_stock():
+    view_inventory() # Show them what they have first
+    
+    item_name = input("\nEnter Item Name to Update (e.g. Burger): ")
+    try:
+        new_stock = int(input(f"Enter new stock count for {item_name}: "))
+        
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        
+        #SQL UPDATE COMMAND
+        #We use '?' placeholders to prevent hacking (SQL Injection)
+        command = "UPDATE inventory SET stock_count = ? WHERE name = ?"
+        
+        cursor.execute(command, (new_stock, item_name))
+        conn.commit() # Save the change!
+        
+        if cursor.rowcount == 0:
+            print(f" [ERROR] Item '{item_name}' not found.")
+        else:
+            print(f" [SUCCESS] Updated {item_name} stock to {new_stock}.")
+            
+    except ValueError:
+        print(" [!] Error: Stock must be a number.")
+    except Exception as e:
+        print(f" [CRITICAL] Update failed: {e}")
+    finally:
+        conn.close()
+
+# --- FUNCTION 3: DELETE (Remove) ---
+def delete_item():
+    view_inventory()
+    
+    item_name = input("\nEnter Item Name to DELETE (Warning: Permanent): ")
+    confirm = input(f"Are you sure you want to delete {item_name}? (y/n): ")
+    
+    if confirm.lower() == 'y':
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        
+        #SQL DELETE COMMAND
+        command = "DELETE FROM inventory WHERE name = ?"
+        
+        cursor.execute(command, (item_name,))
+        conn.commit()
+        
+        if cursor.rowcount == 0:
+            print(f" [ERROR] Item '{item_name}' not found.")
+        else:
+            print(f" [GONE] {item_name} has been removed from the database.")
+        
+        conn.close()
+
+# --- MAIN MENU LOOP ---
+while True:
+    print("\n=== KITCHEN DB MANAGER ===")
+    print("1. View Inventory")
+    print("2. Update Stock (Sale/Restock)")
+    print("3. Delete Item (86'd)")
+    print("4. Exit")
+    
+    choice = input("\nSelect Option: ")
+    
+    if choice == '1':
+        view_inventory()
+    elif choice == '2':
+        update_stock()
+    elif choice == '3':
+        delete_item()
+    elif choice == '4':
+        print("System Closing.")
+        break
+    else:
+        print("Invalid Selection.")

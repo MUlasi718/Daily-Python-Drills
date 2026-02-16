@@ -418,42 +418,87 @@ def run_recipe_cost_calculator():
     except Exception as e:
         print(f" [CRITICAL ERROR] {e}")
         
-# --- STATION 14: INVENTORY MANAGER (Day 18) ---
+# --- STATION 14: INVENTORY MANAGER (Final v2) ---
 def run_inventory_manager():
-    print("\n" + "-"*40)
-    print("--- INVENTORY MANAGEMENT SYSTEM ---")
+    db_file = "kitchen.db"
     
-    #CONNECT
-    try:
-        conn = sqlite3.connect("kitchen.db")
-        cursor = conn.cursor()
+    while True:
+        print("\n" + "-"*40)
+        print("--- INVENTORY MANAGEMENT SYSTEM ---")
+        print("1. View Stock")
+        print("2. Update Stock Count")
+        print("3. Delete Item")
+        print("4. Add New Item")  # <--- NEW FEATURE
+        print("5. Return to Main Menu")
         
-        #VIEW STOCK
-        print("Fetching live inventory...")
-        cursor.execute("SELECT * FROM inventory")
-        items = cursor.fetchall()
+        choice = input("Select Option: ")
         
-        if not items:
-            print(" [!] Inventory is empty.")
-        else:
-            print(f"\n [SUCCESS] Database Online. Found {len(items)} items:\n")
-            print("-" * 50)
-            print(f"{'ID':<5} | {'ITEM':<20} | {'PRICE':<10} | {'STOCK'}")
-            print("-" * 50)
+        if choice == '5':
+            break
             
-            for item in items:
-                #item = (id, name, price, stock)
-                print(f"{item[0]:<5} | {item[1]:<20} | ${item[2]:<9.2f} | {item[3]}")
-                
-            print("-" * 50)
+        try:
+            conn = sqlite3.connect(db_file)
+            cursor = conn.cursor()
             
-    except sqlite3.Error as e:
-        print(f" [CRITICAL ERROR] Database offline: {e}")
-        
-    finally:
-        if conn:
-            conn.close()
-            print("\n [SECURE] Database connection closed.")        
+            #VIEW
+            if choice == '1':
+                cursor.execute("SELECT * FROM inventory")
+                items = cursor.fetchall()
+                print(f"\n--- CURRENT INVENTORY ---")
+                print(f"{'ID':<5} | {'ITEM':<15} | {'PRICE':<10} | {'STOCK'}")
+                print("-" * 50)
+                for item in items:
+                    print(f"{item[0]:<5} | {item[1]:<15} | ${item[2]:<9.2f} | {item[3]}")
+                print("-" * 50)
+
+            #UPDATE
+            elif choice == '2':
+                item_name = input("Item Name: ")
+                # Check if it exists first!
+                cursor.execute("SELECT * FROM inventory WHERE name = ?", (item_name,))
+                if not cursor.fetchone():
+                    print(f" [ERROR] '{item_name}' does not exist. Use Option 4 to add it.")
+                else:
+                    new_stock = int(input("New Stock Count: "))
+                    cursor.execute("UPDATE inventory SET stock_count = ? WHERE name = ?", (new_stock, item_name))
+                    conn.commit()
+                    print(f" [SUCCESS] {item_name} updated.")
+
+            #DELETE
+            elif choice == '3':
+                item_name = input("Item Name to DELETE: ")
+                confirm = input("Confirm Delete? (y/n): ")
+                if confirm.lower() == 'y':
+                    cursor.execute("DELETE FROM inventory WHERE name = ?", (item_name,))
+                    conn.commit()
+                    if cursor.rowcount > 0:
+                        print(f" [GONE] {item_name} deleted.")
+                    else:
+                        print(f" [ERROR] Item not found.")
+
+            #ADD (CREATE)
+            elif choice == '4':
+                print("\n--- NEW ITEM ENTRY ---")
+                name = input("Item Name: ")
+                try:
+                    price = float(input("Price: $"))
+                    stock = int(input("Starting Stock: "))
+                    
+                    #The INSERT Command
+                    cursor.execute("INSERT INTO inventory (name, price, stock_count) VALUES (?, ?, ?)", (name, price, stock))
+                    conn.commit()
+                    print(f" [SUCCESS] {name} added to database.")
+                    
+                except ValueError:
+                    print(" [ERROR] Price/Stock must be numbers.")
+                except sqlite3.IntegrityError:
+                    print(" [ERROR] Item already exists.")
+
+        except sqlite3.Error as e:
+            print(f" [DB ERROR] {e}")
+        finally:
+            if 'conn' in locals():
+                conn.close()
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 while True:
@@ -473,7 +518,7 @@ while True:
     print('11. Check Reservations')
     print('12. Search Guest Database')
     print('13. Calculate Recipe Cost')
-    print('14. View Inventory')
+    print('14. Inventory Management')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
