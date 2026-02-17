@@ -6,6 +6,7 @@ import requests
 import csv
 import sqlite3
 import matplotlib.pyplot as plt
+import subprocess
 
 #CONFIGURATION
 #PASTE YOUR SPOONACULAR API KEY BELOW
@@ -501,6 +502,7 @@ def run_inventory_manager():
         finally:
             if 'conn' in locals():
                 conn.close()
+
 #--- STATION 15: PROFIT CHART (Day 20) ---
 def run_profit_chart():
     print("\n" + "-"*40)
@@ -539,6 +541,7 @@ def run_profit_chart():
         print(" [ERROR] No financial records found (kitchen_financials.csv).")
     except Exception as e:
         print(f" [CRITICAL ERROR] Visualization failed: {e}")
+
 #--- STATION 16: WEATHER WIDGET (Day 21) ---
 def run_weather_widget():
     print("\n" + "-"*40)
@@ -546,7 +549,7 @@ def run_weather_widget():
     
     city = input("Enter City Name to Search: ")
     
-    #Open-Meteo Geocoding API 
+    #Open-Meteo Geocoding API (No Key Required)
     search_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=5&language=en&format=json"
 
     try:
@@ -563,10 +566,8 @@ def run_weather_widget():
 
         for i, place in enumerate(results):
              name = place.get("name")
-             #Get State/Region (admin1) and Country
              region = place.get("admin1", "N/A") 
              country = place.get("country", "Unknown")
-             
              print(f" {i+1}. {name}, {region} ({country})")
 
         choice = input("\nSelect Number (1-5): ")
@@ -575,7 +576,6 @@ def run_weather_widget():
             index = int(choice) - 1
             selected = results[index]
 
-            #Get Coordinates for precision weather
             lat = selected["latitude"]
             lon = selected["longitude"]
             place_name = selected["name"]
@@ -583,22 +583,114 @@ def run_weather_widget():
 
             print(f"\nLoading forecast for: {place_name}, {place_region}...")
 
-            #Fetch weather art using coordinates
             weather_url = f"https://wttr.in/{lat},{lon}?0"
             weather_response = requests.get(weather_url)
 
             print("\n" + "="*40)
             print(weather_response.text)
             print("="*40)
-            
         else:
             print(" [!] Invalid selection.")
 
     except Exception as e:
         print(f" [ERROR] Search failed: {e}")
 
+#--- STATION 17: LAUNCH POS SYSTEM (GUI) ---
+def run_pos_launcher():
+    print("\n" + "-"*40)
+    print("--- LAUNCHING POINT OF SALE ---")
+    print(" [INFO] Opening GUI Window...")
+    
+    # We try both names just in case you renamed it or not
+    import os
+    if os.path.exists("pos.py"):
+        filename = "pos.py"
+    elif os.path.exists("Day 24- Connected POS.py"):
+        filename = "Day 24- Connected POS.py"
+    else:
+        print(" [ERROR] Could not find POS file.")
+        return
+
+    try:
+        subprocess.Popen(["python3", filename])
+        print(" [SUCCESS] POS Window Launched.")
+    except Exception as e:
+        print(f" [CRITICAL] Launcher failed: {e}")
+
+#--- STATION 18: MANAGER ORDER LOG ---
+def view_order_history():
+    print("\n" + "="*50)
+    print("--- PERMANENT ORDER HISTORY (DB) ---")
+    print(f"{'ID':<5} | {'TIME':<20} | {'STATUS':<10} | {'ITEMS'}")
+    print("-" * 50)
+    
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM active_tickets ORDER BY ticket_id DESC")
+        history = cursor.fetchall()
+        
+        if not history:
+            print(" [EMPTY] No orders recorded yet.")
+        else:
+            for row in history:
+                t_id, time, items, status = row
+                items = items.replace("\n", ", ") 
+                if len(items) > 40: items = items[:37] + "..."
+                print(f"{t_id:<5} | {time:<20} | {status:<10} | {items}")
+                
+        print("-" * 50)
+        input("Press Enter to return...")
+    except sqlite3.Error as e:
+        print(f" [ERROR] Could not read log: {e}")
+    finally:
+        if 'conn' in locals(): conn.close()
+
+#--- STATION 19: LAUNCH KDS ---
+def run_kds_launcher():
+    print("\n" + "-"*40)
+    print("--- LAUNCHING KITCHEN DISPLAY ---")
+    
+    import os
+    # Try both names
+    if os.path.exists("kds.py"):
+        filename = "kds.py"
+    elif os.path.exists("Kitchen_Display.py"):
+        filename = "Kitchen_Display.py"
+    else:
+        print(" [ERROR] Could not find KDS file.")
+        return
+
+    try:
+        subprocess.Popen(["python3", filename])
+        print(" [SUCCESS] KDS Window Launched.")
+    except Exception as e:
+        print(f" [CRITICAL] Launcher failed: {e}")
+
+#--- DATABASE SETUP FUNCTION (Must be defined BEFORE it is called) ---
+def setup_ticket_table():
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS active_tickets (
+                ticket_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                items TEXT,
+                status TEXT DEFAULT 'PENDING'
+            )
+        """)
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f" [DATABASE ERROR] Ticket table setup failed: {e}")
+    finally:
+        if 'conn' in locals(): conn.close()
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
+
+#START THE DATABASE ENGINE
+setup_ticket_table() 
+
 while True:
     print('\n' + '='*40)
     print("   MMADU'S KITCHEN OS - MAIN MENU")
@@ -619,6 +711,9 @@ while True:
     print('14. Inventory Management')
     print('15. View Profit Chart')
     print('16. Check Weather')
+    print('17. Launch POS System (GUI)')
+    print('18. View Order History Log') 
+    print('19. Launch Kitchen Display (KDS)')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -655,6 +750,12 @@ while True:
         run_profit_chart()
     elif choice == '16':
         run_weather_widget()
+    elif choice == '17':
+        run_pos_launcher()
+    elif choice == '18':
+        view_order_history()
+    elif choice == '19':    
+        run_kds_launcher()
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
