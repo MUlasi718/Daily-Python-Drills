@@ -539,7 +539,64 @@ def run_profit_chart():
         print(" [ERROR] No financial records found (kitchen_financials.csv).")
     except Exception as e:
         print(f" [CRITICAL ERROR] Visualization failed: {e}")
+#--- STATION 16: WEATHER WIDGET (Day 21) ---
+def run_weather_widget():
+    print("\n" + "-"*40)
+    print("--- KITCHEN METEOROLOGY STATION ---")
+    
+    city = input("Enter City Name to Search: ")
+    
+    #Open-Meteo Geocoding API 
+    search_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count=5&language=en&format=json"
+
+    try:
+        print(f"Searching for '{city}'...")
+        response = requests.get(search_url)
+        data = response.json()
+
+        if "results" not in data:
+            print(" [!] No locations found.")
+            return
+            
+        results = data["results"]
+        print(f"\n [SUCCESS] Found {len(results)} matches:")
+
+        for i, place in enumerate(results):
+             name = place.get("name")
+             #Get State/Region (admin1) and Country
+             region = place.get("admin1", "N/A") 
+             country = place.get("country", "Unknown")
+             
+             print(f" {i+1}. {name}, {region} ({country})")
+
+        choice = input("\nSelect Number (1-5): ")
         
+        if choice.isdigit() and 1 <= int(choice) <= len(results):
+            index = int(choice) - 1
+            selected = results[index]
+
+            #Get Coordinates for precision weather
+            lat = selected["latitude"]
+            lon = selected["longitude"]
+            place_name = selected["name"]
+            place_region = selected.get("admin1", "")
+
+            print(f"\nLoading forecast for: {place_name}, {place_region}...")
+
+            #Fetch weather art using coordinates
+            weather_url = f"https://wttr.in/{lat},{lon}?0"
+            weather_response = requests.get(weather_url)
+
+            print("\n" + "="*40)
+            print(weather_response.text)
+            print("="*40)
+            
+        else:
+            print(" [!] Invalid selection.")
+
+    except Exception as e:
+        print(f" [ERROR] Search failed: {e}")
+
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 while True:
@@ -561,6 +618,7 @@ while True:
     print('13. Calculate Recipe Cost')
     print('14. Inventory Management')
     print('15. View Profit Chart')
+    print('16. Check Weather')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -595,6 +653,8 @@ while True:
         run_inventory_manager()
     elif choice == '15':
         run_profit_chart()
+    elif choice == '16':
+        run_weather_widget()
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
