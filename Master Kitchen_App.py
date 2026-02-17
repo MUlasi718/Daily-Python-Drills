@@ -5,6 +5,7 @@ import datetime
 import requests
 import csv
 import sqlite3
+import matplotlib.pyplot as plt
 
 #CONFIGURATION
 #PASTE YOUR SPOONACULAR API KEY BELOW
@@ -307,45 +308,46 @@ def run_host_stand():
             
     except Exception as e:
         print(f" [CRITICAL ERROR] Connection failed: {e}")
-        
-# --- STATION 12: GUEST SEARCH (Day 14) ---
+#--- STATION 12: GUEST SEARCH (Enhanced) ---
 def run_guest_search():
     print("\n" + "-"*40)
     print("--- GUEST RESERVATION SEARCH ---")
     
-    #INPUT
-    guest_id = input("Enter Guest ID (1-10): ")
+    user_id = input("Enter Guest ID (1-10): ")
     
-    #PARAMETER (Query String)
-    url = f"https://jsonplaceholder.typicode.com/users?id={guest_id}"
+    #Use f-string to insert the ID into the URL
+    url = f"https://jsonplaceholder.typicode.com/users?id={user_id}"
+    
+    #Mock data to match the host stand
+    times = ["5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"]
+    notes = ["Anniversary", "Nut Allergy", "VIP", "Window Seat", "Birthday", "None"]
     
     try:
-        print(f"Searching for Guest ID #{guest_id}...")
-        time.sleep(1)
+        print(f"Searching for Guest ID #{user_id}...")
         response = requests.get(url)
+        results = response.json()
         
-        if response.status_code == 200:
-            results = response.json()
+        if len(results) > 0:
+            user = results[0]
             
-            # Check if the list is not empty
-            if len(results) > 0:
-                user = results[0] # Grab the first item
-                
-                print("\n [SUCCESS] Record Found:")
-                print("-" * 40)
-                print(f" Name:    {user['name']}")
-                print(f" Email:   {user['email']}")
-                print(f" City:    {user['address']['city']}")
-                print(f" Company: {user['company']['name']}")
-                print("-" * 40)
-            else:
-                print(f"\n [!] No record found for ID {user_id}")
+            #Generate random details on the fly
+            res_time = random.choice(times)
+            guest_note = random.choice(notes)
+            
+            print("\n [SUCCESS] Record Found:")
+            print("-" * 40)
+            print(f" Name:    {user['name']}")
+            print(f" Time:    {res_time}")
+            print(f" Email:   {user['email']}")
+            print(f" City:    {user['address']['city']}")
+            print(f" Company: {user['company']['name']}")
+            print(f" Note:    {guest_note}")
+            print("-" * 40)
         else:
-            print(f" [ERROR] Server returned: {response.status_code}")
-            
-    except Exception as e:
-        print(f" [CRITICAL ERROR] Connection failed: {e}")        
+            print(f" [!] No guest found with ID {user_id}")
 
+    except Exception as e:
+        print(f" [CRITICAL ERROR] Connection failed: {e}")
 # --- STATION 13: RECIPE COST CALCULATOR (Integrated) ---
 def run_recipe_cost_calculator():
     print('\n' + '-'*40)
@@ -499,6 +501,45 @@ def run_inventory_manager():
         finally:
             if 'conn' in locals():
                 conn.close()
+#--- STATION 15: PROFIT CHART (Day 20) ---
+def run_profit_chart():
+    print("\n" + "-"*40)
+    print("--- GENERATING FINANCIAL REPORT ---")
+    
+    items = []
+    profits = []
+    
+    try:
+        #Read the live financial log
+        with open('kitchen_financials.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                items.append(row['item'])
+                profits.append(float(row['profit']))
+        
+        if not items:
+            print(" [!] No financial data found.")
+            return
+
+        print(f" [SUCCESS] Visualizing {len(items)} menu items...")
+        
+        #Build the chart
+        plt.figure(figsize=(10, 6))
+        plt.bar(items, profits, color='green')
+        plt.title('Kitchen Menu Profitability')
+        plt.xlabel('Menu Items')
+        plt.ylabel('Profit ($)')
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        #Show it
+        print(" [DISPLAY] Chart opened in new window. Close it to continue.")
+        plt.show()
+        
+    except FileNotFoundError:
+        print(" [ERROR] No financial records found (kitchen_financials.csv).")
+    except Exception as e:
+        print(f" [CRITICAL ERROR] Visualization failed: {e}")
+        
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 while True:
@@ -519,6 +560,7 @@ while True:
     print('12. Search Guest Database')
     print('13. Calculate Recipe Cost')
     print('14. Inventory Management')
+    print('15. View Profit Chart')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -551,6 +593,8 @@ while True:
         run_recipe_cost_calculator()
     elif choice == '14':
         run_inventory_manager()
+    elif choice == '15':
+        run_profit_chart()
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
