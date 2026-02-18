@@ -752,6 +752,7 @@ while True:
         run_weather_widget()
     elif choice == '17':
         run_pos_launcher()
+        subprocess.run(["python3", "pos.py"])
     elif choice == '18':
         view_order_history()
     elif choice == '19':    
