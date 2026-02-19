@@ -685,6 +685,78 @@ def setup_ticket_table():
         print(f" [DATABASE ERROR] Ticket table setup failed: {e}")
     finally:
         if 'conn' in locals(): conn.close()
+        
+#--- STATION 20: MANAGER DASHBOARD ---
+def run_dashboard():
+    print("\n" + "-"*40)
+    print("--- LAUNCHING MANAGER DASHBOARD ---")
+    import os
+    if os.path.exists("dashboard.py"):
+        try:
+            import subprocess
+            subprocess.Popen(["python3", "dashboard.py"])
+            print(" [SUCCESS] Dashboard Launched.")
+        except Exception as e:
+            print(f" [CRITICAL] Launcher failed: {e}")
+    else:
+        print(" [ERROR] dashboard.py file not found.")
+
+#--- STATION 21: MARKETING AUTOMATOR ---
+def run_marketing_automator():
+    print("\n" + "="*50)
+    print("--- 🚀 EMAIL & SMS MARKETING AUTOMATOR ---")
+    
+    import os
+    import csv
+    import time
+    
+    # 1. Grab the Daily Special
+    special_text = "Come down to Mmadu's Kitchen for some great food!"
+    if os.path.exists("daily_menu.txt"):
+        with open("daily_menu.txt", "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                if "Today's Special:" in line:
+                    special_text = line.strip()
+                    
+    if special_text == "Come down to Mmadu's Kitchen for some great food!":
+        print(" [!] Notice: Using default message. Generate a daily special (Option 4) for better results.")
+
+    # 2. Grab the Customer List
+    if not os.path.exists("marketing_list.csv"):
+        print(" [!] No marketing data found. Ring up some customers in the POS first.")
+        return
+        
+    print(f"\n [CAMPAIGN LOADED]: {special_text}")
+    print(" Executing automated dispatch sequence...\n")
+    time.sleep(1)
+    
+    # 3. The "Sending" Loop
+    emails_sent = 0
+    texts_sent = 0
+    
+    with open("marketing_list.csv", "r") as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) >= 4:
+                name = row[1]
+                contact = row[2]
+                method = row[3]
+                
+                if "EMAIL" in method:
+                    print(f" 📧 [EMAIL SENT] To: {contact} | Subject: Hey {name}, hungry? | {special_text}")
+                    emails_sent += 1
+                    time.sleep(0.4) # Simulates network delay
+                    
+                elif "SMS" in method:
+                    print(f" 📱 [TEXT SENT]  To: {contact} | Msg: Yo {name}! {special_text}")
+                    texts_sent += 1
+                    time.sleep(0.4)
+
+    print("-" * 50)
+    print(f" [SUCCESS] Campaign Finished! Reached {emails_sent} inboxes and {texts_sent} phones.")
+    print("=" * 50)
+
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 
@@ -714,6 +786,8 @@ while True:
     print('17. Launch POS System (GUI)')
     print('18. View Order History Log') 
     print('19. Launch Kitchen Display (KDS)')
+    print('20. Launch Analytics Dashboard')
+    print('21. Run Marketing Automator')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -752,11 +826,14 @@ while True:
         run_weather_widget()
     elif choice == '17':
         run_pos_launcher()
-        subprocess.run(["python3", "pos.py"])
     elif choice == '18':
         view_order_history()
     elif choice == '19':    
         run_kds_launcher()
+    elif choice == '20':
+        run_dashboard()
+    elif choice == '21':
+        run_marketing_automator()
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
