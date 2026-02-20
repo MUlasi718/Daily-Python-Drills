@@ -685,6 +685,26 @@ def setup_ticket_table():
         print(f" [DATABASE ERROR] Ticket table setup failed: {e}")
     finally:
         if 'conn' in locals(): conn.close()
+
+#--- DATABASE SETUP: PAYROLL ---
+def setup_payroll_table():
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS timesheets (
+                shift_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_name TEXT,
+                clock_in DATETIME,
+                clock_out DATETIME,
+                total_hours REAL
+            )
+        """)
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f" [DATABASE ERROR] Payroll setup failed: {e}")
+    finally:
+        if 'conn' in locals(): conn.close()
         
 #--- STATION 20: MANAGER DASHBOARD ---
 def run_dashboard():
@@ -757,11 +777,119 @@ def run_marketing_automator():
     print(f" [SUCCESS] Campaign Finished! Reached {emails_sent} inboxes and {texts_sent} phones.")
     print("=" * 50)
 
+#--- STATION 22: THE ACCOUNTANT (DATA EXPORT) ---
+def run_accountant_export():
+    print("\n" + "="*50)
+    print("--- 📁 THE ACCOUNTANT: EOD DATA EXPORT ---")
+    
+    import csv
+    import sqlite3
+    import datetime
+    
+    # Create a unique filename based on the exact time
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M")
+    filename = f"EOD_Report_{now}.csv"
+
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+
+        with open(filename, 'w', newline='') as f:
+            writer = csv.writer(f)
+            
+            # Section 1: Inventory
+            writer.writerow(["--- INVENTORY REPORT ---"])
+            writer.writerow(["Name", "Stock Count"])
+            cursor.execute("SELECT name, stock_count FROM inventory")
+            writer.writerows(cursor.fetchall())
+            
+            writer.writerow([]) # Blank line for spacing
+            
+            # Section 2: Tickets
+            writer.writerow(["--- DAILY TICKET HISTORY ---"])
+            writer.writerow(["Ticket ID", "Timestamp", "Items", "Status"])
+            cursor.execute("SELECT ticket_id, timestamp, items, status FROM active_tickets")
+            writer.writerows(cursor.fetchall())
+
+        print(f" [SUCCESS] End of Day data exported securely to: {filename}")
+    except Exception as e:
+        print(f" [ERROR] Export failed: {e}")
+    finally:
+        if 'conn' in locals(): conn.close()
+
+#--- STATION 23: THE TIME CLOCK (PAYROLL v2) ---
+def run_time_clock():
+    print("\n" + "="*50)
+    print("--- ⏰ KITCHEN TIME CLOCK ---")
+    
+    import sqlite3
+    from datetime import datetime
+
+    # The Employee Roster (ID -> Name)
+    # In a massive restaurant, this would be its own DB table.
+    roster = {
+        "1001": "Coco Planter",
+        "1002": "Mmadu Ulasi",
+        "1003": "John Doe",
+        "1004": "Tony Two Shoes"
+    }
+
+    emp_id = input("Enter Employee ID (e.g., 1001): ").strip()
+
+    # ID Validation
+    if emp_id not in roster:
+        print(f" [!] ERROR: ID {emp_id} not recognized. Please see your manager.")
+        return
+
+    emp_name = roster[emp_id]
+
+    try:
+        conn = sqlite3.connect("kitchen.db")
+        cursor = conn.cursor()
+        
+        # FIX: Convert datetime to a strict string to remove the Python 3.12 warning
+        now = datetime.now()
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Check if the employee is currently clocked in
+        cursor.execute("SELECT shift_id, clock_in FROM timesheets WHERE employee_name = ? AND clock_out IS NULL", (emp_name,))
+        open_shift = cursor.fetchone()
+
+        if open_shift:
+            # PUNCH OUT LOGIC
+            shift_id = open_shift[0]
+            
+            # Read the string back out of the database and convert it back to time math
+            # We use slicing [:-7] if old data has microseconds, to make it clean
+            safe_time_str = open_shift[1].split('.')[0] 
+            clock_in_time = datetime.strptime(safe_time_str, "%Y-%m-%d %H:%M:%S")
+            
+            # Calculate total hours worked
+            time_diff = now - clock_in_time
+            hours_worked = round(time_diff.total_seconds() / 3600, 4)
+
+            # Save the fixed string format
+            cursor.execute("UPDATE timesheets SET clock_out = ?, total_hours = ? WHERE shift_id = ?", (now_str, hours_worked, shift_id))
+            conn.commit()
+            print(f" [CLOCKED OUT] {emp_name} (ID: {emp_id}) at {now.strftime('%I:%M %p')}")
+            print(f" Shift Duration: {hours_worked} hours logged for payroll.")
+        else:
+            # PUNCH IN LOGIC
+            cursor.execute("INSERT INTO timesheets (employee_name, clock_in) VALUES (?, ?)", (emp_name, now_str))
+            conn.commit()
+            print(f" [CLOCKED IN] {emp_name} (ID: {emp_id}) at {now.strftime('%I:%M %p')}. Have a good shift!")
+
+    except Exception as e:
+        print(f" [ERROR] Time Clock failed: {e}")
+    finally:
+        if 'conn' in locals(): conn.close()
+        
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 
 #START THE DATABASE ENGINE
 setup_ticket_table() 
+setup_payroll_table()
 
 while True:
     print('\n' + '='*40)
@@ -788,6 +916,8 @@ while True:
     print('19. Launch Kitchen Display (KDS)')
     print('20. Launch Analytics Dashboard')
     print('21. Run Marketing Automator')
+    print('22. Export EOD Database Report')
+    print('23. Employee Time Clock')
     print('Q. Quit Application')
 
     choice = input('\nSelect an option: ').upper()
@@ -834,6 +964,10 @@ while True:
         run_dashboard()
     elif choice == '21':
         run_marketing_automator()
+    elif choice == '22':             
+        run_accountant_export()       
+    elif choice == '23':              
+        run_time_clock()    
     elif choice == 'Q':
         print('System Shutting Down. Goodbye Chef.')
         break  
