@@ -1,0 +1,61 @@
+--- INVENTORY REPORT ---
+Name,Stock Count
+Burger,150
+Fries,227
+Steak,12
+Soda,62
+
+--- DAILY TICKET HISTORY ---
+Ticket ID,Timestamp,Items,Status
+1,2026-02-17 04:25:23,1x Burger (Notes: None),DONE
+2,2026-02-17 04:28:32,"3x Fries (None)
+3x Burger (None)",DONE
+3,2026-02-17 04:45:15,"27x Fries (None)
+1x Burger (None)
+200x Soda (None)",DONE
+4,2026-02-17 05:14:30,1x Steak (None),DONE
+5,2026-02-17 21:18:49,7x Burger (cheese),DONE
+6,2026-02-18 06:01:11,"23x Burger (None)
+1x Steak (None)
+24x Soda (None)",DONE
+7,2026-02-18 06:03:01,"1x Burger (None)
+1x Soda (None)",DONE
+8,2026-02-18 06:20:42,"1x Burger (None)
+1x Fries (None)
+1x Soda (None)
+1x Steak (None)
+(GRATUITY INCLUDED)",DONE
+9,2026-02-18 06:27:00,"2x Steak (None)
+6x Fries (None)
+23x Burger (None)
+(GRATUITY INCLUDED)",DONE
+10,2026-02-18 06:35:10,"1x Burger (None)
+(GRATUITY INCLUDED)",DONE
+11,2026-02-18 06:35:44,"1x Soda (None)
+(GRATUITY INCLUDED)",DONE
+12,2026-02-18 06:48:48,"1x Steak (None)
+(GRATUITY INCLUDED)",DONE
+13,2026-02-18 06:51:41,"1x Fries (None)
+1x Steak (None)
+1x Burger (None)
+(GRATUITY INCLUDED)",DONE
+14,2026-02-18 06:56:53,"1x Soda (None)
+(GRATUITY INCLUDED)",DONE
+15,2026-02-18 07:02:11,"1x Burger (None)
+(GRATUITY INCLUDED)",DONE
+16,2026-02-18 23:08:19,"2x Fries (None)
+2x Burger (None)
+2x Steak (None)
+4x Soda (None)
+2x Steak (None)",DONE
+17,2026-02-18 23:15:37,1x Burger (None),DONE
+18,2026-02-18 23:18:33,1x Fries (None),DONE
+19,2026-02-18 23:34:10,1x Burger (None),DONE
+20,2026-02-18 23:39:10,1x Burger (None),DONE
+21,2026-02-19 00:24:33,9x Steak (None),DONE
+22,2026-02-19 00:46:36,3x Soda (None),DONE
+23,2026-02-19 00:47:11,12x Fries (None),DONE
+24,2026-02-19 00:50:19,1x Steak (None),DONE
+25,2026-02-20 15:27:16,"12x Burger (None)
+1x Steak (None)
+123x Fries (None)",DONE

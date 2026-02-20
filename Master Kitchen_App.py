@@ -887,89 +887,105 @@ def run_time_clock():
 #      MAIN CONTROL CENTER (The Loop)
 # ==========================================
 
-#START THE DATABASE ENGINE
+# START THE DATABASE ENGINE
 setup_ticket_table() 
 setup_payroll_table()
 
+# --- DAY 30: ROLE-BASED ACCESS CONTROL (RBAC) ---
+print("\n" + "="*50)
+print("   🔒 KITCHEN OS - AUTHORIZATION REQUIRED 🔒")
+print("="* 50)
+
+# Master Roster (ID -> Name, Role)
+authorized_users = {
+    "1002": {"name": "Mmadu Ulasi", "role": "Admin"},
+    "1003": {"name": "John Doe", "role": "Admin"},
+    "1001": {"name": "Coco Planter", "role": "Employee"},
+    "1004": {"name": "Kizzy", "role": "Employee"}
+}
+
+current_user = None
+current_role = None
+
+# THE LOGIN WALL
+while current_role is None:
+    login_id = input("Enter Valid ID to Boot System (or 'Q' to quit): ").strip().upper()
+    if login_id == 'Q':
+        print("System Shutting Down.")
+        exit()
+    
+    if login_id in authorized_users:
+        current_user = authorized_users[login_id]["name"]
+        current_role = authorized_users[login_id]["role"]
+        print(f"\n [ACCESS GRANTED] Welcome, {current_user} ({current_role} Privileges)")
+        import time
+        time.sleep(1)
+    else:
+        print(" [ACCESS DENIED] Unrecognized ID.")
+
+# --- MAIN APPLICATION LOOP ---
 while True:
-    print('\n' + '='*40)
-    print("   MMADU'S KITCHEN OS - MAIN MENU")
-    print('='* 40)
-    print('1. Login System')
-    print('2. Firewall Check')
-    print('3. Password Generator')
-    print('4. Generate Daily Special')
-    print('5. Update Security Logs')
-    print('6. View Last Menu')
-    print('7. View Security Logs')
-    print('8. Check Item Price')
-    print('9. Run POS System')
-    print('10. Check Online Orders')
-    print('11. Check Reservations')
-    print('12. Search Guest Database')
-    print('13. Calculate Recipe Cost')
-    print('14. Inventory Management')
-    print('15. View Profit Chart')
-    print('16. Check Weather')
+    print('\n' + '='*50)
+    print(f"   MMADU'S KITCHEN OS - {current_role.upper()} TERMINAL")
+    print('='* 50)
+    
+    # --- EVERYONE SEES THESE ---
     print('17. Launch POS System (GUI)')
-    print('18. View Order History Log') 
     print('19. Launch Kitchen Display (KDS)')
-    print('20. Launch Analytics Dashboard')
-    print('21. Run Marketing Automator')
-    print('22. Export EOD Database Report')
     print('23. Employee Time Clock')
-    print('Q. Quit Application')
+    
+    # --- ONLY ADMINS SEE THESE ---
+    if current_role == "Admin":
+        print('-'*50)
+        print('--- ADMIN & MANAGER TOOLS ---')
+        print('4. Generate Daily Special')
+        print('13. Calculate Recipe Cost')
+        print('14. Inventory Management')
+        print('18. View Order History Log')
+        print('20. Launch Analytics Dashboard')
+        print('21. Run Marketing Automator')
+        print('22. Export EOD Database Report')
+        print('99. View All Legacy Stations (1-16)') 
+        
+    print('Q. Logout / Quit Application')
 
     choice = input('\nSelect an option: ').upper()
     
-    if choice == '1':
-        run_login_system()
-    elif choice == '2':
-        run_firewall()
-    elif choice == '3':
-        run_password_generator()
-    elif choice == '4':
-        run_daily_special()
-    elif choice == '5':
-        update_logs()
-    elif choice == '6':
-        view_last_menu()
-    elif choice == '7':
-        view_security_logs()
-    elif choice == '8':
-        run_price_check()
-    elif choice == '9':
-        run_pos_system()
-    elif choice == '10':
-        run_api_check()
-    elif choice == '11':
-        run_host_stand()
-    elif choice == '12':
-        run_guest_search()  
-    elif choice == '13':
-        run_recipe_cost_calculator()
-    elif choice == '14':
-        run_inventory_manager()
-    elif choice == '15':
-        run_profit_chart()
-    elif choice == '16':
-        run_weather_widget()
-    elif choice == '17':
-        run_pos_launcher()
-    elif choice == '18':
-        view_order_history()
-    elif choice == '19':    
-        run_kds_launcher()
-    elif choice == '20':
-        run_dashboard()
-    elif choice == '21':
-        run_marketing_automator()
-    elif choice == '22':             
-        run_accountant_export()       
-    elif choice == '23':              
-        run_time_clock()    
+    # --- UNIVERSAL COMMANDS ---
+    if choice == '17': run_pos_launcher()
+    elif choice == '19': run_kds_launcher()
+    elif choice == '23': run_time_clock()
     elif choice == 'Q':
-        print('System Shutting Down. Goodbye Chef.')
-        break  
+        print('Logging out. Goodbye.')
+        break
+        
+    # --- ADMIN ONLY COMMANDS ---
+    elif current_role == "Admin":
+        if choice == '4': run_daily_special()
+        elif choice == '13': run_recipe_cost_calculator()
+        elif choice == '14': run_inventory_manager()
+        elif choice == '18': view_order_history()
+        elif choice == '20': run_dashboard()
+        elif choice == '21': run_marketing_automator()
+        elif choice == '22': run_accountant_export()
+        elif choice == '99':
+            print("\n [LEGACY TOOLS UNLOCKED]")
+            print(" You can still type 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 15, or 16 manually.")
+        
+        # Hidden legacy triggers so your old code still works if typed!
+        elif choice == '1': run_login_system()
+        elif choice == '2': run_firewall()
+        elif choice == '3': run_password_generator()
+        elif choice == '5': update_logs()
+        elif choice == '6': view_last_menu()
+        elif choice == '7': view_security_logs()
+        elif choice == '8': run_price_check()
+        elif choice == '9': run_pos_system()
+        elif choice == '10': run_api_check()
+        elif choice == '11': run_host_stand()
+        elif choice == '12': run_guest_search()
+        elif choice == '15': run_profit_chart()
+        elif choice == '16': run_weather_widget()
+        else: print(' [!] Invalid Selection.')
     else:
-        print('Invalid Selection. Please try again.')
+        print(' [RESTRICTED] You do not have permission for this command.')
